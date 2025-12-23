@@ -1,1 +1,312 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lora:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Thangka-inspired color palette */
+    --background: 30 27% 93%; /* Warm Parchment Beige #F4EFEA */
+    --foreground: 0 0% 17%; /* Charcoal Black #2B2B2B */
+
+    --card: 30 30% 96%;
+    --card-foreground: 0 0% 17%;
+
+    --popover: 30 30% 96%;
+    --popover-foreground: 0 0% 17%;
+
+    --primary: 0 59% 30%; /* Deep Maroon #7A1F1F */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 43 52% 54%; /* Antique Gold #C9A44C */
+    --secondary-foreground: 0 0% 17%;
+
+    --muted: 30 20% 88%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 43 52% 54%; /* Antique Gold */
+    --accent-foreground: 0 0% 17%;
+
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 120 30% 40%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 25 70% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    --border: 30 20% 82%;
+    --input: 30 20% 85%;
+    --ring: 0 59% 30%;
+
+    --radius: 0.375rem;
+
+    /* Custom Thangka tokens */
+    --gold: 43 52% 54%;
+    --gold-light: 43 60% 70%;
+    --gold-dark: 43 50% 40%;
+    --maroon: 0 59% 30%;
+    --maroon-light: 0 50% 45%;
+    --maroon-dark: 0 65% 20%;
+    --parchment: 30 27% 93%;
+    --parchment-dark: 30 25% 85%;
+    --charcoal: 0 0% 17%;
+    --cream: 30 40% 97%;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(43 52% 54%), hsl(43 60% 65%));
+    --gradient-maroon: linear-gradient(135deg, hsl(0 59% 30%), hsl(0 50% 40%));
+    --gradient-parchment: linear-gradient(180deg, hsl(30 27% 93%), hsl(30 25% 88%));
+    --gradient-hero: linear-gradient(135deg, hsl(30 27% 93%) 0%, hsl(30 30% 88%) 50%, hsl(30 25% 85%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 17% / 0.1);
+    --shadow-card: 0 8px 30px -8px hsl(0 0% 17% / 0.12);
+    --shadow-elevated: 0 20px 50px -15px hsl(0 0% 17% / 0.15);
+    --shadow-gold: 0 4px 20px -4px hsl(43 52% 54% / 0.3);
+
+    /* Typography */
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Lora', serif;
+    --font-ui: 'Inter', sans-serif;
+
+    /* Sidebar (keeping for compatibility) */
+    --sidebar-background: 30 27% 93%;
+    --sidebar-foreground: 0 0% 17%;
+    --sidebar-primary: 0 59% 30%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 43 52% 54%;
+    --sidebar-accent-foreground: 0 0% 17%;
+    --sidebar-border: 30 20% 82%;
+    --sidebar-ring: 0 59% 30%;
+  }
+
+  .dark {
+    --background: 0 0% 12%;
+    --foreground: 30 27% 93%;
+
+    --card: 0 0% 15%;
+    --card-foreground: 30 27% 93%;
+
+    --popover: 0 0% 15%;
+    --popover-foreground: 30 27% 93%;
+
+    --primary: 43 52% 54%;
+    --primary-foreground: 0 0% 12%;
+
+    --secondary: 0 59% 30%;
+    --secondary-foreground: 30 27% 93%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 30 20% 70%;
+
+    --accent: 43 52% 54%;
+    --accent-foreground: 0 0% 12%;
+
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 43 52% 54%;
+
+    --sidebar-background: 0 0% 12%;
+    --sidebar-foreground: 30 27% 93%;
+    --sidebar-primary: 43 52% 54%;
+    --sidebar-primary-foreground: 0 0% 12%;
+    --sidebar-accent: 0 0% 20%;
+    --sidebar-accent-foreground: 30 27% 93%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 43 52% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-ui {
+    font-family: var(--font-ui);
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .bg-gradient-maroon {
+    background: var(--gradient-maroon);
+  }
+
+  .bg-gradient-parchment {
+    background: var(--gradient-parchment);
+  }
+
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  /* Shadows */
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Sacred text styling */
+  .text-sacred {
+    @apply tracking-wide;
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+  }
+
+  /* Gold accent underline */
+  .gold-underline {
+    position: relative;
+  }
+
+  .gold-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: hsl(var(--secondary));
+  }
+
+  /* Thangka card hover effect */
+  .thangka-card {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .thangka-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Calm button animation */
+  .btn-calm {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .btn-calm:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Verification badge */
+  .verified-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-ui font-medium;
+    background: hsl(var(--secondary) / 0.15);
+    color: hsl(var(--secondary-foreground));
+    border: 1px solid hsl(var(--secondary) / 0.3);
+  }
+
+  /* Decorative border pattern */
+  .border-ornate {
+    border-image: linear-gradient(90deg, transparent, hsl(var(--secondary)), transparent) 1;
+  }
+}
+
+@layer utilities {
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 0.6s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  /* Stagger children */
+  .stagger-children > * {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Subtle pulse for sacred elements */
+  @keyframes sacredPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .animate-sacred-pulse {
+    animation: sacredPulse 3s ease-in-out infinite;
+  }
+}
