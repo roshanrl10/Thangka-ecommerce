@@ -44,25 +44,26 @@ export function ProductCard({ product, className, style }: ProductCardProps) {
   };
 
   return (
-    <Link
-      to={`/product/${product.id}`}
+    <div
       style={style}
       className={cn(
-        "group block bg-card rounded-lg overflow-hidden thangka-card border border-border/50",
+        "group block bg-card rounded-lg overflow-hidden thangka-card border border-border/50 transition-all",
         className
       )}
     >
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-        <img
-          src={product.images[0]}
-          alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+        <Link to={`/product/${product.id}`} className="block h-full w-full">
+            <img
+            src={product.images[0]}
+            alt={product.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+        </Link>
         
         {/* Overlay Actions */}
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute bottom-4 left-4 right-4 flex gap-2 pointer-events-auto">
             <Button
               variant="calm"
               size="sm"
@@ -100,7 +101,6 @@ export function ProductCard({ product, className, style }: ProductCardProps) {
         <div className="flex items-center gap-1 mb-2">
           <Link
             to={`/artist/${product.artistId}`}
-            onClick={(e) => e.stopPropagation()}
             className="text-xs font-ui text-muted-foreground hover:text-secondary transition-colors"
           >
             {product.artistName}
@@ -111,9 +111,11 @@ export function ProductCard({ product, className, style }: ProductCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="font-display text-base text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
-          {product.title}
-        </h3>
+        <Link to={`/product/${product.id}`} className="block">
+            <h3 className="font-display text-base text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+            {product.title}
+            </h3>
+        </Link>
 
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3">
@@ -140,6 +142,6 @@ export function ProductCard({ product, className, style }: ProductCardProps) {
           {product.size.width} × {product.size.height} {product.size.unit}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }

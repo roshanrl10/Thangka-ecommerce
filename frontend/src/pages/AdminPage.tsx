@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { 
   Users, Package, ShoppingCart, Palette, Settings, 
@@ -15,11 +17,47 @@ export default function AdminPage() {
   const { user } = useStore();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
-  // Mock data for admin
-  const pendingArtists = [
-    { id: '1', name: 'Tenzin Norbu', email: 'tenzin@example.com', appliedDate: '2024-01-15', status: 'pending' },
-    { id: '2', name: 'Karma Wangmo', email: 'karma@example.com', appliedDate: '2024-01-18', status: 'pending' },
-  ];
+  // State for dynamic data
+  const [pendingArtists, setPendingArtists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch pending artists
+  useEffect(() => {
+    if (activeTab === 'artists' || activeTab === 'overview') {
+      fetchPendingArtists();
+    }
+  }, [activeTab]);
+
+  const fetchPendingArtists = async () => {
+    try {
+      const { data } = await api.get('/admin/pending-artists');
+      setPendingArtists(data);
+    } catch (error) {
+      console.error('Failed to fetch pending artists');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (artistId: string) => {
+    try {
+      await api.post('/admin/approve-artist', { artistId });
+      toast.success('Artist approved');
+      fetchPendingArtists();
+    } catch (error) {
+      toast.error('Action failed');
+    }
+  };
+
+  const handleReject = async (artistId: string) => {
+    try {
+      await api.post('/admin/reject-artist', { artistId });
+      toast.info('Artist rejected');
+      fetchPendingArtists();
+    } catch (error) {
+      toast.error('Action failed');
+    }
+  };
 
   const recentOrders = [
     { id: 'ORD001', customer: 'John Doe', total: 2500, status: 'processing', date: '2024-01-20' },
@@ -57,7 +95,7 @@ export default function AdminPage() {
             <h1 className="font-display text-3xl text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage your Thangka marketplace</p>
           </div>
-          <Link to="/profile">
+          <Link to="/admin/settings">
             <Button variant="outline">
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -276,11 +314,11 @@ export default function AdminPage() {
                         <Eye className="h-4 w-4 mr-1" />
                         Review
                       </Button>
-                      <Button variant="gold" size="sm">
+                      <Button variant="gold" size="sm" onClick={() => handleApprove(artist._id)}>
                         <CheckCircle className="h-4 w-4 mr-1" />
                         Approve
                       </Button>
-                      <Button variant="outline" size="sm" className="text-destructive border-destructive">
+                      <Button variant="outline" size="sm" className="text-destructive border-destructive" onClick={() => handleReject(artist._id)}>
                         <XCircle className="h-4 w-4 mr-1" />
                         Reject
                       </Button>

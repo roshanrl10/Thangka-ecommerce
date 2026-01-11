@@ -1,19 +1,67 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BadgeCheck, Star, MapPin, Calendar, Palette, ShoppingBag, Award } from 'lucide-react';
+import { BadgeCheck, Star, MapPin, Calendar, Palette, ShoppingBag, Award, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
-import { artists, products } from '@/data/mockData';
+import api from '@/lib/api';
+import { Artist, Product } from '@/types';
 
 export default function ArtistProfilePage() {
   const { id } = useParams();
-  const artist = artists.find((a) => a.id === id);
-  const artistProducts = products.filter((p) => p.artistId === id);
+  const [artist, setArtist] = useState<any>(null); // Using any for nested backend structure
+  const [artistProducts, setArtistProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!artist) {
+  useEffect(() => {
+    if (id) {
+        fetchArtistData();
+    }
+  }, [id]);
+
+  const fetchArtistData = async () => {
+    try {
+        setIsLoading(true);
+        // 1. Fetch Artist Profile
+        const { data: artistData } = await api.get(`/artist/${id}`);
+        setArtist(artistData);
+
+        // 2. Fetch Products and filter for this artist (by User ID)
+        // Accessing userId which is populated in artistData
+        const userId = artistData.userId?._id || artistData.userId; 
+
+        if (userId) {
+            const { data: productResponse } = await api.get('/products');
+            const allProducts = Array.isArray(productResponse.data) ? productResponse.data : [];
+            const filtered = allProducts.filter((p: any) => {
+                const productArtistId = p.artist?._id || p.artist;
+                return productArtistId === userId;
+            });
+            setArtistProducts(filtered);
+        }
+
+    } catch (err) {
+        console.error("Failed to load artist profile", err);
+        setError('Artist not found');
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+        </div>
+      );
+  }
+
+  if (error || !artist) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="font-display text-2xl text-foreground mb-4">Artist not found</h1>
+          <p className="text-muted-foreground mb-4">The artist you are looking for does not exist or has been removed.</p>
           <Button variant="gold" asChild>
             <Link to="/artists">View All Artists</Link>
           </Button>
@@ -22,12 +70,15 @@ export default function ArtistProfilePage() {
     );
   }
 
+  // Helper to safely get user data
+  const userData = artist.userId || {};
+
   return (
     <div className="min-h-screen bg-background">
       {/* Banner */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <img
-          src={artist.bannerImage || artist.profileImage}
+          src={artist.bannerImage || userData.profileImage || 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=1200&h=400&fit=crop'}
           alt=""
           className="w-full h-full object-cover"
         />
@@ -42,8 +93,8 @@ export default function ArtistProfilePage() {
             <div className="flex-shrink-0 -mt-24 md:-mt-28">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-card overflow-hidden shadow-elevated">
                 <img
-                  src={artist.profileImage}
-                  alt={artist.name}
+                  src={userData.profileImage || userData.avatar || 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400&h=400&fit=crop'}
+                  alt={userData.name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -53,10 +104,10 @@ export default function ArtistProfilePage() {
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
                 <h1 className="font-display text-3xl md:text-4xl text-foreground">
-                  {artist.name}
+                  {userData.name || 'Unknown Artist'}
                 </h1>
-                {artist.isVerified && (
-                  <span className="verified-badge">
+                {artist.status === 'approved' && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
                     <BadgeCheck className="h-4 w-4" />
                     Verified Artist
                   </span>
@@ -70,7 +121,7 @@ export default function ArtistProfilePage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4 text-secondary" />
-                  Member since {new Date(artist.joinedAt).getFullYear()}
+                  Member since {new Date(artist.createdAt).getFullYear()}
                 </span>
               </div>
 
@@ -84,16 +135,16 @@ export default function ArtistProfilePage() {
               {/* Stats */}
               <div className="flex flex-wrap gap-6">
                 <div>
-                  <p className="font-display text-2xl text-foreground">{artist.totalArtworks}</p>
+                  <p className="font-display text-2xl text-foreground">{artist.totalArtworks || 0}</p>
                   <p className="font-ui text-xs text-muted-foreground">Artworks</p>
                 </div>
                 <div>
-                  <p className="font-display text-2xl text-foreground">{artist.totalSales}</p>
+                  <p className="font-display text-2xl text-foreground">{artist.totalSales || 0}</p>
                   <p className="font-ui text-xs text-muted-foreground">Sales</p>
                 </div>
                 <div>
                   <p className="font-display text-2xl text-foreground flex items-center gap-1">
-                    {artist.rating}
+                    {artist.rating || 0}
                     <Star className="h-5 w-5 fill-secondary text-secondary" />
                   </p>
                   <p className="font-ui text-xs text-muted-foreground">Rating</p>
@@ -125,7 +176,7 @@ export default function ArtistProfilePage() {
             <div className="bg-card rounded-lg border border-border p-6">
               <h2 className="font-display text-xl text-foreground mb-4">Specializations</h2>
               <div className="flex flex-wrap gap-2">
-                {artist.thangkaTypes.map((type) => (
+                {artist.thangkaTypes?.map((type: string) => (
                   <span
                     key={type}
                     className="px-3 py-1.5 bg-muted text-sm font-ui text-muted-foreground rounded-full"
@@ -153,7 +204,7 @@ export default function ArtistProfilePage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl text-foreground">
-                Artworks by {artist.name}
+                Artworks by {userData.name || 'Artist'} 
               </h2>
               <span className="flex items-center gap-1 font-ui text-sm text-muted-foreground">
                 <ShoppingBag className="h-4 w-4" />
@@ -168,7 +219,7 @@ export default function ArtistProfilePage() {
                   No artworks available yet
                 </p>
                 <p className="font-ui text-sm text-muted-foreground">
-                  Check back soon for new creations from this artist
+                  Check back soon for new creations from this artist.
                 </p>
               </div>
             ) : (

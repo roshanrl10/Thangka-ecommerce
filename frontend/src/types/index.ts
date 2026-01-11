@@ -52,7 +52,9 @@ export interface User {
   name: string;
   role: 'guest' | 'buyer' | 'artist' | 'admin';
   profileImage?: string;
+  avatar?: string;
   isVerifiedArtist?: boolean;
+  artistApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
 }
 
 export interface ArtistApplication {

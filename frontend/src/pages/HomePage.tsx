@@ -1,13 +1,52 @@
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Brush, Award, Truck, ChevronRight } from 'lucide-react';
+import { ArrowRight, Shield, Brush, Award, Truck, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
-import { products, categories } from '@/data/mockData';
+import api from '@/lib/api';
+
+// Reusing local categories for UI consistency
+// Categories will be derived dynamically from products
 
 export default function HomePage() {
-  const allProducts = products;
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/products');
+        const productsData = data.data;
+        setProducts(Array.isArray(productsData) ? productsData : []);
+      } catch (error) {
+        console.error("Failed to fetch products for home page", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const categories = useMemo(() => {
+    const uniqueCategories = new Map();
+    products.forEach(product => {
+      // Assuming product.category exists and is a string
+      if (product.category && !uniqueCategories.has(product.category)) {
+        uniqueCategories.set(product.category, {
+          id: product.category,
+          name: product.category
+            .split('-')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' '),
+          image: product.images && product.images.length > 0 ? product.images[0] : '', // Fallback or empty
+        });
+      }
+    });
+    return Array.from(uniqueCategories.values());
+  }, [products]);
+
   const newArrivals = products.slice(0, 4);
-  const bestSellers = products.slice(2, 6);
+  const bestSellers = products.length > 4 ? products.slice(4, 8) : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,61 +112,85 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* New Arrivals Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-xl md:text-2xl text-foreground">New Arrivals</h2>
-            <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
-              See all <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {newArrivals.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+        {/* Loading State */}
+        {isLoading ? (
+             <div className="flex justify-center items-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+            </div>
+        ) : (
+            <>
+                {/* New Arrivals Section */}
+                {newArrivals.length > 0 && (
+                    <section className="mb-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="font-display text-xl md:text-2xl text-foreground">New Arrivals</h2>
+                        <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
+                        See all <ChevronRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {newArrivals.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                        ))}
+                    </div>
+                    </section>
+                )}
 
-        {/* Deal Banner */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-lg p-6 mb-10 flex items-center justify-between">
-          <div>
-            <p className="font-display text-xl md:text-2xl text-primary-foreground mb-1">Authentic Thangka Collection</p>
-            <p className="font-body text-sm text-primary-foreground/80">Hand-painted by verified Himalayan artists</p>
-          </div>
-          <Button variant="secondary" size="sm" asChild>
-            <Link to="/shop">Shop Now</Link>
-          </Button>
-        </div>
+                {/* Deal Banner */}
+                <div className="bg-gradient-to-r from-primary to-primary/80 rounded-lg p-6 mb-10 flex items-center justify-between">
+                <div>
+                    <p className="font-display text-xl md:text-2xl text-primary-foreground mb-1">Authentic Thangka Collection</p>
+                    <p className="font-body text-sm text-primary-foreground/80">Hand-painted by verified Himalayan artists</p>
+                </div>
+                <Button variant="secondary" size="sm" asChild>
+                    <Link to="/shop">Shop Now</Link>
+                </Button>
+                </div>
 
-        {/* Best Sellers Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-xl md:text-2xl text-foreground">Best Sellers</h2>
-            <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
-              See all <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {bestSellers.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+                {/* Best Sellers Section */}
+                {bestSellers.length > 0 && (
+                    <section className="mb-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="font-display text-xl md:text-2xl text-foreground">Featured Artworks</h2>
+                        <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
+                        See all <ChevronRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {bestSellers.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                        ))}
+                    </div>
+                    </section>
+                )}
 
-        {/* All Products Grid */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-xl md:text-2xl text-foreground">Explore All Thangkas</h2>
-            <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
-              View all <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {allProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+                {/* All Products Grid */}
+                {products.length > 0 && (
+                    <section className="mb-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="font-display text-xl md:text-2xl text-foreground">Explore All Thangkas</h2>
+                        <Link to="/shop" className="flex items-center gap-1 text-sm font-ui text-primary hover:underline">
+                        View all <ChevronRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {products.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                        ))}
+                    </div>
+                    </section>
+                )}
+                
+                {products.length === 0 && (
+                    <div className="text-center py-20 bg-gray-50 rounded-lg mb-10">
+                        <p className="text-gray-500 mb-4">Our artisans are currently curating new masterpieces.</p>
+                        <Button asChild>
+                            <Link to="/shop">Browse Shop</Link>
+                        </Button>
+                    </div>
+                )}
+            </>
+        )}
 
         {/* Artist Banner */}
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">

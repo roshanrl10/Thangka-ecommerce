@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Heart, User, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useStore } from '@/store/useStore';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, ShoppingCart, Heart, User, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useStore } from "@/store/useStore";
+import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'Shop', href: '/shop' },
-  { name: 'Artists', href: '/artists' },
-  { name: 'About', href: '/about' },
+  { name: "Home", href: "/" },
+  { name: "Shop", href: "/shop" },
+  { name: "Artists", href: "/artists" },
+  { name: "About", href: "/about" },
 ];
 
 export function Navbar() {
@@ -27,10 +27,12 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-lg">ॐ</span>
+              <span className="text-primary-foreground font-display text-lg">
+                ॐ
+              </span>
             </div>
             <span className="font-display text-xl md:text-2xl text-foreground tracking-wide">
-              Thangka<span className="text-secondary">Art</span>
+              Thangka<span className="text-secondary">Ecommerce</span>
             </span>
           </Link>
 
@@ -51,7 +53,9 @@ export function Navbar() {
                 <span
                   className={cn(
                     "absolute -bottom-1 left-0 w-full h-0.5 bg-secondary transform transition-transform origin-left",
-                    location.pathname === item.href ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    location.pathname === item.href
+                      ? "scale-x-100"
+                      : "scale-x-0 group-hover:scale-x-100"
                   )}
                 />
               </Link>
@@ -70,7 +74,11 @@ export function Navbar() {
             </Button>
 
             <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative text-muted-foreground hover:text-foreground"
+              >
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-secondary text-secondary-foreground text-xs rounded-full flex items-center justify-center font-ui">
@@ -96,7 +104,11 @@ export function Navbar() {
 
             {user ? (
               <Link to="/profile">
-                <Button variant="ghost" size="icon" className="ml-2 text-muted-foreground hover:text-foreground">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 text-muted-foreground hover:text-foreground"
+                >
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
@@ -130,7 +142,11 @@ export function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className="text-muted-foreground"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>

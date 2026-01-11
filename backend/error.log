@@ -1,0 +1,3 @@
+[dotenv@17.2.3] injecting env (1) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+server started at http://localhost:5000
+Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017

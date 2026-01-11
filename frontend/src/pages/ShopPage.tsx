@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, Grid3X3, LayoutList } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Grid3X3, LayoutList, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
-import { products, categories } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
+
+// Categories will be derived dynamically from products
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
@@ -27,6 +29,51 @@ export default function ShopPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Real Data State
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/products');
+        // Backend returns { success: true, data: [...] }
+        const productsData = data.data;
+        // Map backend data to match Product interface (flatten artist)
+        const mappedProducts = Array.isArray(productsData) ? productsData.map((p: any) => ({
+            ...p,
+            id: p.id || p._id,
+            artistId: p.artist?._id || p.artist,
+            artistName: p.artist?.name || 'Unknown Artist',
+            // Ensure images is array
+            images: Array.isArray(p.images) ? p.images : [p.images].filter(Boolean)
+        })) : [];
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const categories = useMemo(() => {
+    const counts = new Map();
+    products.forEach(p => {
+        if(p.category) {
+            counts.set(p.category, (counts.get(p.category) || 0) + 1);
+        }
+    });
+
+    return Array.from(counts.entries()).map(([cat, count]) => ({
+        id: cat,
+        name: cat.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        productCount: count
+    }));
+  }, [products]);
 
   // Get filter values from URL
   const selectedCategory = searchParams.get('category') || 'all';
@@ -53,9 +100,9 @@ export default function ShopPage() {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
-          p.title.toLowerCase().includes(query) ||
-          p.artistName.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query)
+          p.title?.toLowerCase().includes(query) ||
+          p.artist?.name?.toLowerCase().includes(query) || // Backend might populate artist or just return ID
+          p.category?.toLowerCase().includes(query)
       );
     }
 
@@ -84,10 +131,10 @@ export default function ShopPage() {
         result.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        // result.sort((a, b) => b.rating - a.rating); // Handle optional rating
         break;
       case 'popular':
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        // result.sort((a, b) => b.reviewCount - a.reviewCount);
         break;
       case 'newest':
       default:
@@ -95,7 +142,7 @@ export default function ShopPage() {
     }
 
     return result;
-  }, [searchQuery, selectedCategory, selectedSort, selectedPrice]);
+  }, [products, searchQuery, selectedCategory, selectedSort, selectedPrice]);
 
   const clearFilters = () => {
     setSearchParams(new URLSearchParams());
@@ -263,7 +310,11 @@ export default function ShopPage() {
               )}
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {isLoading ? (
+                <div className="flex justify-center items-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="font-display text-xl text-foreground mb-2">No Thangkas found</p>
                 <p className="font-ui text-muted-foreground mb-6">

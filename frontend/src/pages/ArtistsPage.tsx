@@ -1,10 +1,48 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArtistCard } from '@/components/artist/ArtistCard';
 import { Button } from '@/components/ui/button';
-import { artists } from '@/data/mockData';
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight, Users, Loader2 } from 'lucide-react';
+import api from '@/lib/api';
+import { Artist } from '@/types';
 
 export default function ArtistsPage() {
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchArtists();
+  }, []);
+
+  const fetchArtists = async () => {
+    try {
+      const { data } = await api.get('/artist');
+      // Transform backend data to match Artist interface
+      const transformedArtists = data.map((item: any) => ({
+        id: item._id,
+        name: item.userId?.name || 'Unknown Artist',
+        profileImage: item.userId?.avatar || item.profileImage || 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400&h=400&fit=crop', // Fallback
+        bannerImage: item.bannerImage,
+        location: item.location,
+        nationality: item.nationality,
+        yearsOfExperience: item.yearsOfExperience,
+        artLineage: item.artLineage,
+        biography: item.biography,
+        thangkaTypes: item.thangkaTypes || [],
+        isVerified: true,
+        totalArtworks: item.totalArtworks || 0,
+        totalSales: item.totalSales || 0,
+        rating: item.rating || 0,
+        joinedAt: item.createdAt
+      }));
+      setArtists(transformedArtists);
+    } catch (error) {
+      console.error("Failed to fetch artists", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -33,16 +71,26 @@ export default function ArtistsPage() {
 
       {/* Artists Grid */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {artists.map((artist, index) => (
-            <ArtistCard
-              key={artist.id}
-              artist={artist}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.1}s` } as React.CSSProperties}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+             <div className="flex justify-center items-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+            </div>
+        ) : artists.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground">
+                <p>No verified artists found yet.</p>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {artists.map((artist, index) => (
+                <ArtistCard
+                key={artist.id}
+                artist={artist}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` } as React.CSSProperties}
+                />
+            ))}
+            </div>
+        )}
       </div>
 
       {/* CTA Section */}

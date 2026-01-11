@@ -1,0 +1,12 @@
+MongoDB Connected: localhost
+
+--- Debugging Dashboard Stats ---
+Total Buyers: 0
+Total Artists: 2
+Pending Artists: 0
+Total Orders: 0
+Order Statuses present in DB: []
+Sample Orders: []
+Total Revenue (Paid/Delivered): 0
+Fetching stats since: 2025-07-06T09:12:11.127Z
+Revenue Graph Data: []

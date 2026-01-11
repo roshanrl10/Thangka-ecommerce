@@ -1,0 +1,23 @@
+MongoDB Connected: localhost
+
+--- Debugging Product Upload ---
+Total Users in DB: 3
+- User: Admin User, Role: artist, ID: 695c047a5b71ac802c00c5e9
+- User: Test Artist, Role: artist, ID: 695c047a5b71ac802c00c5eb
+- User: r, Role: buyer, ID: 695c117d3aa1725bb104d093
+No Admin user found. Using first user as mock admin.
+Attempting to create product instance...
+isVerifiedArtist preserved on instance.
+Validating product...
+
+--- Debugging Artist Fetching ---
+Fetching all approved artists...
+Validation successful.
+Saving product...
+Product saved successfully: 695ccb12b4c9f6e38fad7884
+Found 2 approved artists.
+Sample Artist User Data: {
+  "_id": "695c047a5b71ac802c00c5eb",
+  "name": "Test Artist",
+  "email": "artist@thangka.com"
+}

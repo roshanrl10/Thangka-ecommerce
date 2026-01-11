@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Upload, X, CheckCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useStore } from '@/store/useStore';
+import api from '@/lib/api';
 
 const thangkaTypes = [
   'Buddha',
@@ -63,19 +65,44 @@ export default function ApplyArtistPage() {
     }));
   };
 
+  const { user } = useStore();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (!user) {
+      toast.error('You must be logged in to apply');
+      setIsSubmitting(false);
+      return;
+    }
 
-    toast.success('Application submitted successfully!', {
-      description: 'We will review your application and get back to you within 5-7 business days.',
-    });
+    try {
+      // For now, we are sending mock URLs for files as file upload is not yet implemented
+      const payload = {
+        userId: user.id,
+        fullName: formData.fullName,
+        nationality: formData.nationality,
+        biography: formData.biography,
+        yearsOfExperience: parseInt(formData.yearsOfExperience),
+        artLineage: formData.artLineage,
+        thangkaTypes: formData.thangkaTypes,
+        idProof: 'https://placehold.co/600x400?text=ID+Proof', // Mock URL
+        portfolio: formData.sampleArtworks.map((_, i) => `https://placehold.co/600x400?text=Artwork+${i+1}`), // Mock URLs
+      };
 
-    navigate('/');
-    setIsSubmitting(false);
+      await api.post('/artist/apply', payload);
+
+      toast.success('Application submitted successfully!', {
+        description: 'We will review your application and get back to you within 5-7 business days.',
+      });
+
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Application failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isStep1Valid = formData.fullName && formData.nationality && formData.biography.length >= 300;

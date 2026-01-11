@@ -4,6 +4,8 @@ import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store/useStore';
 import { toast } from 'sonner';
+import api from '@/lib/api';
+import { SocialLogin } from '@/components/SocialLogin';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,20 +23,36 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const { data } = await api.post(endpoint, formData);
 
-    // Mock authentication
-    setUser({
-      id: 'user-1',
-      email: formData.email,
-      name: formData.name || formData.email.split('@')[0],
-      role: 'buyer',
-    });
+      // Save token
+      localStorage.setItem('token', data.token);
 
-    toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
-    navigate('/');
-    setIsLoading(false);
+      // Update store
+      setUser({
+        id: data._id,
+        email: data.email,
+        name: data.name,
+        role: data.role,
+      });
+
+      toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
+      
+      // Redirect based on role
+      if (data.role === 'admin') {
+        navigate('/admin');
+      } else if (data.role === 'artist') {
+        navigate('/artist');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -147,6 +165,17 @@ export default function AuthPage() {
             >
               {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
             </Button>
+            
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <SocialLogin />
           </form>
 
           <div className="mt-6 text-center">
