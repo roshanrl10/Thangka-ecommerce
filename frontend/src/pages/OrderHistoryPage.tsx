@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import { useStore } from '@/store/useStore';
 import { Badge } from '@/components/ui/badge';
+import { OrderTracker } from '@/components/OrderTracker';
 
 interface OrderItem {
   _id: string;
@@ -108,6 +109,11 @@ export default function OrderHistoryPage() {
                   </Button> 
                   {/* Actually, user might want to see details. Reusing 'order-success' page? no that's for immediate post-purchase. 
                       For now, listing items directly below is better. */}
+                </div>
+
+                {/* Tracker */}
+                <div className="px-6 pb-2">
+                    <OrderTracker status={order.status} />
                 </div>
 
                 {/* Items */}

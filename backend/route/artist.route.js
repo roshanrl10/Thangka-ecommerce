@@ -1,5 +1,5 @@
 import express from 'express';
-import { applyArtist, getArtistProfile, getAllArtists, updateArtistProfile } from '../controller/artist.controller.js';
+import { applyArtist, getArtistProfile, getAllArtists, updateArtistProfile, getArtistOrders } from '../controller/artist.controller.js';
 
 const router = express.Router();
 
@@ -14,6 +14,8 @@ router.get('/:id', getArtistProfile);
 // So we need to import and apply it here for the update route.
 import { protectRoute, artistRoute } from '../middleware/auth.middleware.js';
 
+
+router.get('/orders', protectRoute, artistRoute, getArtistOrders);
 router.put('/profile', protectRoute, artistRoute, updateArtistProfile);
 router.post('/apply', applyArtist); // This should probably be protected too if we want only logged in users to apply, but logic handles it.
 

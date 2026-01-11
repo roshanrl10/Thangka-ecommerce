@@ -30,7 +30,28 @@ export default function AddProductPage() {
   const { user } = useStore();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<ProductFormData>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProductFormData>();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+          const toastId = toast.loading('Uploading image...');
+          const { data } = await api.post('/upload', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          toast.dismiss(toastId);
+          toast.success('Image uploaded!');
+          setValue('images', data.url);
+      } catch (err) {
+          toast.error('Upload failed');
+          console.error(err);
+      }
+  };
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
@@ -170,9 +191,22 @@ export default function AddProductPage() {
             <h2 className="text-lg font-semibold text-gray-900 pb-2 border-b border-gray-100">Images</h2>
             
             <div className="space-y-2">
-                <Label htmlFor="images">Image URLs (Comma separated)</Label>
-                <Input id="images" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" {...register('images', { required: 'At least one image is required' })} />
-                <p className="text-xs text-muted-foreground">For this demo, please paste direct image links. File upload coming soon.</p> 
+                <Label htmlFor="imageUpload">Upload Image</Label>
+                <div className="flex gap-4 items-start">
+                    <Input 
+                        id="imageUpload" 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                    />
+                </div>
+                <Input 
+                    id="images" 
+                    placeholder="Image URL will appear here after upload" 
+                    readOnly
+                    {...register('images', { required: 'At least one image is required' })} 
+                />
+                 <p className="text-xs text-muted-foreground">Select a file to upload. The URL will be automatically filled.</p>
             </div>
           </div>
 

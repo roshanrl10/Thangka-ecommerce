@@ -1,6 +1,44 @@
 import Artist from '../model/Artist.model.js';
 import User from '../model/User.model.js';
 
+import Order from '../model/Order.model.js';
+import Product from '../model/Product.model.js';
+
+// Get orders for artist
+export const getArtistOrders = async (req, res) => {
+    try {
+        const artistUserId = req.user._id;
+
+        // 1. Find all products created by this artist
+        const products = await Product.find({ artist: artistUserId }).select('_id');
+        const productIds = products.map(p => p._id);
+
+        if (productIds.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        // 2. Find orders that contain any of these products
+        // We use $in operator on items.productId
+        const orders = await Order.find({
+            'items.productId': { $in: productIds }
+        })
+            .populate('userId', 'name email')
+            .populate('items.productId')
+            .sort({ createdAt: -1 });
+
+        // 3. Filter items within the orders? 
+        // The user might want to see the WHOLE order, or just their items. 
+        // For simplicity, we return the whole order but the Frontend highlights their items.
+        // Actually, allowing Artist to change status of WHOLE order if they only provided 1 item is risky 
+        // if multiple artists are involved. But for single-vendor or simple multi-vendor, it's okay for now.
+
+        res.status(200).json(orders);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Apply to become an artist
 export const applyArtist = async (req, res) => {
     try {

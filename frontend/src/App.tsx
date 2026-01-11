@@ -33,6 +33,7 @@ import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import ArtistProductsPage from "./pages/artist/ArtistProductsPage";
 import AddProductPage from "./pages/artist/AddProductPage";
 import ArtistSettingsPage from "./pages/artist/ArtistSettingsPage";
+import ArtistOrdersPage from "./pages/artist/ArtistOrdersPage";
 
 const queryClient = new QueryClient();
 
@@ -85,7 +86,7 @@ const App = () => (
              <Route path="/artist/products" element={<ArtistProductsPage />} />
              <Route path="/artist/products/new" element={<AddProductPage />} />
              <Route path="/artist/profile" element={<ArtistSettingsPage />} />
-             {/* <Route path="/artist/orders" element={<ArtistOrdersPage />} /> */}
+             <Route path="/artist/orders" element={<ArtistOrdersPage />} />
           </Route>
 
           {/* Catch-all */}

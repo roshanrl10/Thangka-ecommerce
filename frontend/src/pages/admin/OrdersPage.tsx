@@ -31,6 +31,19 @@ export default function OrdersPage() {
       order.userId?.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+      try {
+          // Optimistic update
+          setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+          
+          await api.put(`/order/${orderId}/status`, { status: newStatus });
+          toast.success('Order status updated');
+      } catch (error) {
+          toast.error('Failed to update status');
+          fetchOrders(); // Revert on failure
+      }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -77,13 +90,17 @@ export default function OrdersPage() {
                             </td>
                             <td className="p-4 font-medium">Rs. {order.totalPrice}</td>
                             <td className="p-4">
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                    order.status === 'Paid' ? 'bg-green-100 text-green-700' : 
-                                    order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-gray-100 text-gray-700'
-                                }`}>
-                                    {order.status}
-                                </span>
+                                <select 
+                                    value={order.status}
+                                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                    className="px-2 py-1 rounded border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                >
+                                    <option value="Pending">Pending</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
                             </td>
                             <td className="p-4 text-sm text-gray-500">
                                 {new Date(order.createdAt).toLocaleDateString()}

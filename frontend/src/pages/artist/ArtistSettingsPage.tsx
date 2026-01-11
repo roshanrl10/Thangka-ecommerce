@@ -63,6 +63,27 @@ export default function ArtistSettingsPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'profileImage' | 'bannerImage') => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+          const toastId = toast.loading('Uploading...');
+          const { data } = await api.post('/upload', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          toast.dismiss(toastId);
+          toast.success('Uploaded!');
+          setValue(fieldName, data.url);
+      } catch (err) {
+          toast.error('Upload failed');
+          console.error(err);
+      }
+  };
+
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
@@ -95,15 +116,27 @@ export default function ArtistSettingsPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           
           <div className="space-y-2">
-            <Label htmlFor="profileImage">Profile Image URL</Label>
-            <Input id="profileImage" placeholder="https://..." {...register('profileImage')} />
-            <p className="text-xs text-muted-foreground">URL to your profile picture (overrides Google avatar)</p>
+            <Label htmlFor="profileImage">Profile Image</Label>
+            <div className="flex gap-4">
+                <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'profileImage')}
+                />
+            </div>
+            <Input id="profileImage" placeholder="URL value" readOnly {...register('profileImage')} className="mt-2 bg-muted/50" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bannerImage">Banner Image URL</Label>
-            <Input id="bannerImage" placeholder="https://..." {...register('bannerImage')} />
-             <p className="text-xs text-muted-foreground">Large banner image for your profile page</p>
+            <Label htmlFor="bannerImage">Banner Image</Label>
+             <div className="flex gap-4">
+                <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'bannerImage')}
+                />
+            </div>
+            <Input id="bannerImage" placeholder="URL value" readOnly {...register('bannerImage')} className="mt-2 bg-muted/50" />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

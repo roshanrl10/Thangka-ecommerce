@@ -12,6 +12,7 @@ import artistRoutes from "./route/artist.route.js";
 import artistDashboardRoutes from "./route/artist.dashboard.route.js"; // New
 import adminRoutes from "./route/admin.route.js";
 import userRoutes from "./route/user.route.js";
+import uploadRoutes from "./route/upload.route.js"; // New
 
 dotenv.config();
 
@@ -34,7 +35,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/artist", artistRoutes);
 app.use("/api/artist-dashboard", artistDashboardRoutes); // New
 app.use("/api/admin", adminRoutes);
-app.use("/api/users", userRoutes); // New
+app.use("/api/users", userRoutes);
+app.use("/api/upload", uploadRoutes); // New
 
 app.listen(5000, () => {
     console.log("server started at http://localhost:5000");

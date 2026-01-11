@@ -15,7 +15,7 @@ export const createOrder = async (req, res) => {
       shippingAddress,
       totalPrice,
       paymentMethod,
-      status: 'pending'
+      status: 'Pending'
     });
 
     await newOrder.save();
@@ -48,6 +48,26 @@ export const getOrderSuccess = async (req, res) => {
   }
 };
 // 2️⃣ Order History - fetch all orders for a user
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.status(200).json({ message: "Order status updated", order });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update order status", error: error.message });
+  }
+};
+
 export const getOrderHistory = async (req, res) => {
   try {
     const { userId } = req.params;

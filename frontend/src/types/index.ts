@@ -1,5 +1,6 @@
 export interface Product {
   id: string;
+  _id?: string;
   title: string;
   description: string;
   price: number;
@@ -18,6 +19,7 @@ export interface Product {
   isVerifiedArtist: boolean;
   spiritualMeaning?: string;
   inStock: boolean;
+  stock?: number;
   createdAt: string;
   rating: number;
   reviewCount: number;
@@ -25,6 +27,7 @@ export interface Product {
 
 export interface Artist {
   id: string;
+  _id?: string;
   name: string;
   profileImage: string;
   bannerImage?: string;
@@ -48,6 +51,7 @@ export interface CartItem {
 
 export interface User {
   id: string;
+  _id?: string; // MongoDB ID
   email: string;
   name: string;
   role: 'guest' | 'buyer' | 'artist' | 'admin';

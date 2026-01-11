@@ -1,6 +1,7 @@
 import User from '../model/User.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { sendResetEmail } from '../lib/email.js';
 
 export const register = async (req, res) => {
     try {
@@ -87,14 +88,17 @@ export const forgotPassword = async (req, res) => {
 
         await user.save();
 
-        // Simulate sending email
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
-        console.log(`\n[DEBUG] POTENTIAL EMAIL SENT:`);
-        console.log(`To: ${email}`);
-        console.log(`Subject: Password Reset Request`);
-        console.log(`Link: ${resetUrl}\n`);
-
-        res.status(200).json({ message: "Password reset link sent to email (Check logs)" });
+        // Send Email
+        try {
+            await sendResetEmail(email, resetToken);
+            res.status(200).json({ message: "Password reset link sent to email" });
+        } catch (emailError) {
+            // Rollback if email fails
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            await user.save();
+            return res.status(500).json({ message: "Failed to send email. Please try again later." });
+        }
 
     } catch (error) {
         res.status(500).json({ message: error.message });
